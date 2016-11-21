@@ -22,35 +22,29 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.webkit.CookieManager;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.gson.Gson;
+
 import org.apache.commons.httpclient.DefaultHttpMethodRetryHandler;
 import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpException;
-import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.HttpStatus;
-import org.apache.commons.httpclient.NameValuePair;
 import org.apache.commons.httpclient.UsernamePasswordCredentials;
 import org.apache.commons.httpclient.auth.AuthScope;
-import org.apache.commons.httpclient.methods.DeleteMethod;
 import org.apache.commons.httpclient.methods.GetMethod;
-import org.apache.commons.httpclient.methods.PostMethod;
-import org.apache.commons.httpclient.methods.PutMethod;
 import org.apache.commons.httpclient.params.HttpMethodParams;
+;
 
-import java.io.Closeable;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Calendar;
+
 import java.util.List;
-import java.util.Map;
 import java.util.TimeZone;
 
 
@@ -72,6 +66,8 @@ public class MainActivity extends AppCompatActivity {
     private final static int UPDATE_LOCATION = 1;
     private static String nowMac;
     private Handler hander;
+    private String name = "sht";
+    private String password = "pass";
     @SuppressLint("SetTextI18n")
     private void init(){
         perference = findViewById(R.id.perference);
@@ -120,7 +116,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         }).start();
-
+        Doweb("zhranklin.com/imh/item","get");
     }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -149,7 +145,7 @@ public class MainActivity extends AppCompatActivity {
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.setDrawerListener(toggle);
         toggle.syncState();
-        getTotNote("zhranklin,com/imh");
+        //getTotNote("zhranklin,com/imh");
         assert navigationView != null;
         navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener(){
 
@@ -230,13 +226,45 @@ public class MainActivity extends AppCompatActivity {
 
         return super.onOptionsItemSelected(item);
     }
-    private void parseJson(String jsonData) {
-
+    private items parseJson(String jsonData) {
+        Gson gson = new Gson();
+        items item = gson.fromJson(jsonData,items.class);
+        return item;
     }
 
-    /*public void Doweb(String url ,String type){
-        CloseableHttpClient httpclient  = new CloseableHttpClient();
-    }*/
+    public void Doweb(String url ,String type) {
+        HttpClient httpClient = new HttpClient();
+        UsernamePasswordCredentials creds = new UsernamePasswordCredentials(name,password);
+        httpClient.getState().setCredentials(AuthScope.ANY,creds);
+        List <Header> headers = new ArrayList <Header>();
+        headers.add(new Header("User-Agent", "Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1)"));
+        httpClient.getHostConfiguration().getParams().setParameter("http.default-headers", headers);
+
+        GetMethod method=null;
+        if(type.equals("get"))
+            method = new GetMethod(url);
+        assert method!=null;
+        method.setDoAuthentication(true);
+        method.getParams().setParameter(HttpMethodParams.RETRY_HANDLER,
+                new DefaultHttpMethodRetryHandler(3, false));
+        try {
+            int statusCode = httpClient.executeMethod(method);
+            if (statusCode != HttpStatus.SC_OK) {
+                Log.d("web","Method failed code="+statusCode+": " + method.getStatusLine());
+
+            } else {
+                Log.d("web",new String(method.getResponseBody(), "utf-8"));
+            }
+        } catch (HttpException e) {
+            e.printStackTrace();
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            method.releaseConnection();
+        }
+    }
     public static class LocationReceiver extends BroadcastReceiver{
 
         @SuppressLint("SetTextI18n")
@@ -248,34 +276,9 @@ public class MainActivity extends AppCompatActivity {
             locationTextView.setText(locationString+nowMac);
         }
     }
-    private class test{
-        private String title,type,content;
-        public test(String title, String type, String content) {
-            this.title = title;
-            this.type = type;
-            this.content = content;
-        }
+    private class items{
+        public String title,type,content,place,owner,id;
 
-        public String getTitle() {
-            return title;
-        }
-
-        public String getType() {
-            return type;
-        }
-
-        public String getContent() {
-            return content;
-        }
-
-        @Override
-        public String toString() {
-            return "test{" +
-                    "title='" + title + '\'' +
-                    ", type='" + type + '\'' +
-                    ", content='" + content + '\'' +
-                    '}';
-        }
     }
 
     @Override
