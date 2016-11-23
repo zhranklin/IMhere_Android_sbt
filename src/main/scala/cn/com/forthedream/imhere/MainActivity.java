@@ -26,12 +26,10 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
 import cn.com.forthedream.util.Client;
-import cn.com.forthedream.util.Models;
 import com.google.gson.Gson;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.List;
 import java.util.TimeZone;
 
 
@@ -161,8 +159,6 @@ public class MainActivity extends AppCompatActivity {
                 DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
                 assert drawer != null;
                 drawer.closeDrawer(GravityCompat.START);
-//                String user = Client.userTest();
-//                Log.e("clienttest", user.toString());
                 return true;
             }
         });
