@@ -25,7 +25,6 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
-import cn.com.forthedream.util.Client;
 import com.google.gson.Gson;
 
 import java.util.ArrayList;

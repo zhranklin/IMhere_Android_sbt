@@ -98,13 +98,13 @@ object Client {
     override protected def addCredentials(urlConnection: HttpURLConnection) = {}
   }
 
-  trait Handler[T] {
-    def succ(t: T)
+  trait ResponseHandler[T] {
+    def succ(t: (Integer, T))
     def fail(e: Throwable)
   }
 
-  def handleFuture[T](future: Future[T], handler: Handler[T]) = future.onComplete {
-    case Success(obj) ⇒ handler.succ(obj)
+  def handleFuture[T](future: Future[(Int, T)], handler: ResponseHandler[T]) = future.onComplete {
+    case Success(obj) ⇒ handler.succ((obj._1.asInstanceOf[Integer], obj._2))
     case Failure(t) ⇒ handler.fail(t)
   }
 

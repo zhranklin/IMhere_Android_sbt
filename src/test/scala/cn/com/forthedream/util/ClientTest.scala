@@ -11,7 +11,7 @@ import org.scalatest.time._
 import scala.collection.JavaConverters._
 
 
-class ClientTest1 extends FlatSpec with GivenWhenThen with ScalaFutures with Matchers {
+class ClientTest extends FlatSpec with GivenWhenThen with ScalaFutures with Matchers {
   behavior of "Client"
   implicit val defaultPatience = PatienceConfig(timeout = Span(2, Seconds), interval = Span(5, Millis))
 
@@ -31,7 +31,6 @@ class ClientTest1 extends FlatSpec with GivenWhenThen with ScalaFutures with Mat
       assert(userResp == (200, userpass.asUser))
     }
   }
-
 
   behavior of "client with credentials"
   Given("a client for test")
@@ -96,33 +95,35 @@ class ClientTest1 extends FlatSpec with GivenWhenThen with ScalaFutures with Mat
     itemsWithId should contain (toPut)
   }
 
-  val mockPlaces
-  it should "addPlace" in {
+  val mockPlaces = List(
+    Place("001", "pl1"),
+    Place("002", "pl2"),
+    Place("003", "pl3"),
+    Place("004", "pl4"),
+    Place("005", "pl5"),
+    Place("006", "pl6"))
 
+  it should "addPlace" in {
+    val futures = mockPlaces zip mockPlaces.map(client.addPlace)
+    futures.foreach { iFuture ⇒
+      When("adding it")
+      val place = iFuture._1
+      val resp = iFuture._2.futureValue
+      Then("it should resturn right thing")
+      assert(resp == (200, place))
+    }
   }
 
   it should "putPlace" in {
-
+    val toPut = Place("003", "new pl")
+    val resp = client.putPlace(toPut.id, toPut).futureValue
+    assert(resp == (200, toPut))
   }
-
-  it should "getUser" in {
-
-  }
-
 
   it should "delPlace" in {
-
+    val toDel = mockPlaces(4)
+    var resp = client.delPlace(toDel.id).futureValue
+    assert(resp == (200, toDel))
+    assertThrows[Exception](client.getPlace(toDel.id).futureValue)
   }
-
-
-  it should "addUser" in {
-
-  }
-
-  it should "getItem" in {
-
-  }
-
-
-
 }
